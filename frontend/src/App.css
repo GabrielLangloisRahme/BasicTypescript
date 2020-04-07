@@ -1,0 +1,34 @@
+.app {
+  background-color: #1887FC;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  text-align: center;
+}
+
+.app-logo {
+  animation: app-logo-scale infinite alternate 2s ease-in-out;
+  height: 20vmin;
+  pointer-events: none;
+}
+
+.app-body {
+  margin-top: 40px;
+}
+
+a {
+  color: white;
+}
+
+@keyframes app-logo-scale {
+  from {
+    transform: scale(0.5);
+  }
+  to {
+    transform: scale(1.5);
+  }
+}
