@@ -9,6 +9,9 @@ function Home() {
       <p>
         Take me to the <Link to="/workOrders">Work Order Page</Link>.
       </p>
+      <p>
+        Take me to the <Link to="/productivity"> Available Users Page</Link>.
+      </p>
     </>
   );
 }
@@ -132,6 +135,63 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
   }
 }
 
+interface ProductivityState {
+  users:
+    | [
+        {
+          name: string;
+        }
+      ]
+    | null;
+  availableUsers: string[] | null;
+}
+
+class Productivity extends Component<any, ProductivityState> {
+  public state: ProductivityState = {
+    users: null,
+    availableUsers: null,
+  };
+
+  async componentWillMount() {
+    let res = await fetch("/api/availableUsers", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const jsonResponse = await res.json();
+    this.setState({ users: jsonResponse.users });
+
+    if (this.state.users) {
+      const availableUsers = this.state.users.map(({ name }) => name);
+      console.log("these are the users with no work orders 2", availableUsers);
+      this.setState({ availableUsers: availableUsers });
+    }
+  }
+
+  render() {
+    let displayAvailableUsers =
+      "These are the available users that are not currently in a work order: ";
+    let numberAvailableUsers = this.state.availableUsers
+      ? this.state.availableUsers
+      : 0;
+    let displaySentence;
+    if (this.state.availableUsers) {
+      displayAvailableUsers += this.state.availableUsers.join(" ");
+    } else {
+      displayAvailableUsers =
+        "There are no available users since everyone is in a work order.";
+    }
+
+    return (
+      <div>
+        <p>{displayAvailableUsers}</p>
+      </div>
+    );
+  }
+}
+
 export default class App extends Component {
   render() {
     return (
@@ -142,6 +202,7 @@ export default class App extends Component {
             <Route exact path="/" component={Home} />
             <Route path="/workOrders" component={WorkOrders} />
             <Route path="/workOrderDetail/:id" component={WorkOrderDetail} />
+            <Route path="/productivity" component={Productivity} />
           </div>
         </div>
       </Router>

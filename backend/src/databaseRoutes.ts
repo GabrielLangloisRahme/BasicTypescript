@@ -39,15 +39,15 @@ module.exports = (router: any) => {
   );
 
   router.get(
-    "/productivity",
+    "/availableUsers",
     async (req: express.Request, res: express.Response) => {
       const response = await sql(` 
       SELECT name from users where name not IN ( 
         SELECT  D.name FROM 
         (select * from work_orders A inner join work_order_assignees B on A.id=B.work_order_id where A.status='OPEN') C inner join users D on  C.user_id=D.id)
         `);
-      const workOrderAssignee = response;
-      return res.json({ workOrderAssignee });
+      const users = response;
+      return res.json({ users });
     }
   );
 };
