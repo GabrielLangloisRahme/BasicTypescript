@@ -59,7 +59,7 @@ class WorkOrders extends Component<any, WorkOrdersState> {
         let linkUrl = url.concat(id.toString());
         return (
           <p>
-            Work order {name} has a stutus of {status}. Click{" "}
+            Work order {name} has a status of {status}. Click{" "}
             <Link to={linkUrl}>here</Link> for details
           </p>
         );
@@ -107,8 +107,8 @@ interface WorkOrderDetailState {
         {
           name: string;
           status: string;
-          assignee: string;
-          email: string;
+          assignee: string | null;
+          email: string | null;
         }
       ]
     | null;
@@ -120,18 +120,32 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
   };
 
   async componentWillMount() {
-    // let res = await fetch("/api/workOrders", {
-    //   method: "GET",
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-    // const jsonResponse = await res.json();
+    let res = await fetch("/api/workOrderDetail", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: this.props.match.params.id }),
+    });
+    const jsonResponse = await res.json();
+
+    if (jsonResponse.workOrderDetail) {
+      this.setState({ workOrderDetail: jsonResponse.workOrderDetail });
+    }
+
+    console.log("This is the props", this.props);
+
+    console.log("This is the response", jsonResponse);
   }
 
   render() {
-    return <div></div>;
+    const { workOrderDetail } = this.state;
+    let displayContent;
+    if (!workOrderDetail) {
+      displayContent = <p>No one is assigned</p>;
+    }
+    return <div>{displayContent}</div>;
   }
 }
 

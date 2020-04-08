@@ -26,15 +26,21 @@ module.exports = (router: any) => {
   );
 
   router.post(
-    "/workOrderAssignee",
+    "/workOrderDetail",
     async (req: express.Request, res: express.Response) => {
-      const response = await sql(
+      let response = await sql(
         `SELECT C.name as workOrderName,C.status as workOrderStatus, D.name as userName, D.email as userEmail FROM 
-        (select * from work_orders A inner join work_order_assignees B on A.id=B.work_order_id where A.id=?) C inner join users D on  C.user_id=D.id`,
-        Number(req.body.id)
+        (select * from work_orders A inner join work_order_assignees B on A.id=B.work_order_id where A.id=${Number(
+          req.body.id
+        )}) C inner join users D on  C.user_id=D.id`
       );
-      const workOrderAssignee = response;
-      return res.json({ workOrderAssignee });
+      console.log("this is the response", response);
+      if (response.length === 0) {
+        response = await sql(`SELECT name, status, null as assignee, null as email 
+        FROM work_orders where id=${req.body.id}`);
+      }
+      const workOrderDetail = response;
+      return res.json({ workOrderDetail });
     }
   );
 
