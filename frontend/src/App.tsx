@@ -2,7 +2,11 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import logo from "./logo.svg";
 import "./App.css";
+interface Props {}
 
+interface State {
+  count: number;
+}
 function Home() {
   return (
     <>
@@ -21,10 +25,19 @@ interface IExampleState {
   } | null;
 }
 
-class Example extends Component<any, IExampleState> {
-  public state: IExampleState = {
-    favorite: null,
-  };
+class Example extends Component<State> {
+  state: State = { count: 0 };
+
+  async componentWillMount() {
+    const workOrder = await fetch("/api/workorders", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: Math.floor(1 + Math.random() * 9) }),
+    });
+  }
 
   render() {
     const { favorite } = this.state;
@@ -32,7 +45,9 @@ class Example extends Component<any, IExampleState> {
     return (
       <div>
         {!!favorite && (
-          <p>My favorite Morty is <strong>{favorite.name}</strong>!</p>
+          <p>
+            My favorite Morty is <strong>{favorite.name}</strong>!
+          </p>
         )}
         <button type="button" onClick={this.handleHelloWorld}>
           Who's my favorite Morty?
@@ -42,7 +57,7 @@ class Example extends Component<any, IExampleState> {
   }
 
   private handleHelloWorld = async () => {
-    const response = await fetch("/api/example", {
+    const response = await fetch("/api/workorders", {
       method: "POST",
       headers: {
         Accept: "application/json",

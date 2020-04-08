@@ -29,7 +29,7 @@ let consoleOutput = (
   next();
 };
 
-router.post("/example", async (req, res) => {
+router.post("/workorders", async (req, res) => {
   const response = await sql(
     "SELECT * FROM users WHERE id = ?",
     Number(req.body.id) || 9
