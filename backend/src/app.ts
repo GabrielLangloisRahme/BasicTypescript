@@ -4,6 +4,7 @@ import { getDefaultSettings } from "http2";
 
 const app = express();
 const router = express.Router();
+require("./databaseRoutes")(router);
 
 app.use(express.json());
 
@@ -28,15 +29,6 @@ let consoleOutput = (
   });
   next();
 };
-
-router.post("/workorders", async (req, res) => {
-  const response = await sql(
-    "SELECT * FROM users WHERE id = ?",
-    Number(req.body.id) || 9
-  );
-  const favorite = response[0];
-  return res.json({ favorite });
-});
 
 app.use("/api", consoleOutput, router);
 

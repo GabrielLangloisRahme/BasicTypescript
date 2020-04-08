@@ -2,11 +2,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import logo from "./logo.svg";
 import "./App.css";
-interface Props {}
 
-interface State {
-  count: number;
-}
 function Home() {
   return (
     <>
@@ -25,19 +21,10 @@ interface IExampleState {
   } | null;
 }
 
-class Example extends Component<State> {
-  state: State = { count: 0 };
-
-  async componentWillMount() {
-    const workOrder = await fetch("/api/workorders", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id: Math.floor(1 + Math.random() * 9) }),
-    });
-  }
+class Example extends Component<any, IExampleState> {
+  public state: IExampleState = {
+    favorite: null,
+  };
 
   render() {
     const { favorite } = this.state;
@@ -57,7 +44,7 @@ class Example extends Component<State> {
   }
 
   private handleHelloWorld = async () => {
-    const response = await fetch("/api/workorders", {
+    const response = await fetch("/api/example", {
       method: "POST",
       headers: {
         Accept: "application/json",
