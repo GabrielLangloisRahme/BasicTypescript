@@ -102,24 +102,28 @@ class WorkOrders extends Component<any, WorkOrdersState> {
 }
 
 interface WorkOrderDetailState {
-  workOrderDetail:
-    | [
-        {
-          orderName: string;
-          orderStatus: string;
-          assignee: string | null;
-          email: string | null;
-          statusToggle: boolean | string;
-        }
-      ]
-    | null;
-  hoverValue: string | null;
+  workOrderDetail: [
+    {
+      orderName: string;
+      orderStatus: string;
+      assignee: string;
+      email: string;
+      statusToggle: boolean;
+    }
+  ];
 }
 
 class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
   public state: WorkOrderDetailState = {
-    workOrderDetail: null,
-    hoverValue: "",
+    workOrderDetail: [
+      {
+        orderName: "",
+        orderStatus: "",
+        assignee: "",
+        email: "",
+        statusToggle: false,
+      },
+    ],
   };
 
   async componentWillMount() {
@@ -149,7 +153,7 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
       orderStatus,
       assigneeArray,
       assignee,
-      emailArray: (string | null)[],
+      emailArray: string[],
       statusToggle,
       displayContent;
 
@@ -162,22 +166,10 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
 
       emailArray = workOrderDetail.map(({ email }) => email);
 
+      console.log("this is the emailArray ", emailArray);
       assignee = assigneeArray.map((assignee, index) => {
         if (assignee) {
-          return (
-            <p
-              onMouseEnter={() => {
-                this.setState({ hoverValue: emailArray[index] });
-              }}
-              onMouseLeave={() => {
-                this.setState({ hoverValue: "" });
-              }}
-            >
-              {assignee}
-              {"  "}
-              {this.state.hoverValue}
-            </p>
-          );
+          return <p title={emailArray[index]}>{assignee}</p>;
         }
       });
 
@@ -198,47 +190,6 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
         {assignee}
       </div>
     );
-    // <form>
-    //   <label>
-    //     Name of Work Order:
-    //     <input
-    //       name="orderName"
-    //       type="string"
-    //       value={orderName}
-    //       style={{ width: "300px" }}
-    //       // onChange={this.handleInputChange}
-    //     />
-    //   </label>
-    //   <br />
-    //   <label>
-    //     Order Status:
-    //     <input
-    //       name="orderStatus"
-    //       type="string"
-    //       value={orderStatus}
-    //       style={{ width: "300px" }}
-    //       // onChange={this.handleInputChange}
-    //     />
-    //   </label>
-    //   <br />
-    //   <label>
-    //     Assignee:
-    //     <input
-    //       name="assignee"
-    //       type="string"
-    //       value={assignee}
-    //       style={{ width: "300px" }}
-    //       // onChange={this.handleInputChange}
-    //     />
-    //   </label>
-    //   <br />
-    //   <label>
-    //    Turn Work Order On:
-    //    <button type="button" onClick={this.handleHelloWorld}>
-    //       Who's my favorite Morty?
-    //     </button>
-    //   </label>
-    // </form>
   }
 }
 
