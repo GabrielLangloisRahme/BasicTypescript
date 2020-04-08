@@ -105,18 +105,21 @@ interface WorkOrderDetailState {
   workOrderDetail:
     | [
         {
-          name: string;
-          status: string;
+          orderName: string;
+          orderStatus: string;
           assignee: string | null;
           email: string | null;
+          statusToggle: boolean | string;
         }
       ]
     | null;
+  hoverValue: string | null;
 }
 
 class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
   public state: WorkOrderDetailState = {
     workOrderDetail: null,
+    hoverValue: "",
   };
 
   async componentWillMount() {
@@ -137,15 +140,105 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
     console.log("This is the props", this.props);
 
     console.log("This is the response", jsonResponse);
+    console.log("This is the state", this.state.workOrderDetail);
   }
 
   render() {
     const { workOrderDetail } = this.state;
-    let displayContent;
-    if (!workOrderDetail) {
+    let orderName,
+      orderStatus,
+      assigneeArray,
+      assignee,
+      emailArray: (string | null)[],
+      statusToggle,
+      displayContent;
+
+    if (workOrderDetail) {
+      orderName = workOrderDetail.map(({ orderName }) => orderName)[0];
+      orderStatus = workOrderDetail.map(({ orderStatus }) => orderStatus)[0];
+      assigneeArray = workOrderDetail.map(({ assignee }) => assignee);
+
+      console.log("this is the type of assigneeArray ", assigneeArray);
+
+      emailArray = workOrderDetail.map(({ email }) => email);
+
+      assignee = assigneeArray.map((assignee, index) => {
+        if (assignee) {
+          return (
+            <p
+              onMouseEnter={() => {
+                this.setState({ hoverValue: emailArray[index] });
+              }}
+              onMouseLeave={() => {
+                this.setState({ hoverValue: "" });
+              }}
+            >
+              {assignee}
+              {"  "}
+              {this.state.hoverValue}
+            </p>
+          );
+        }
+      });
+
+      statusToggle = workOrderDetail.map(
+        ({ statusToggle }) => !!statusToggle
+      )[0];
+    } else {
       displayContent = <p>No one is assigned</p>;
     }
-    return <div>{displayContent}</div>;
+
+    console.log("this is the assignee", assignee);
+    return (
+      <div>
+        <p>
+          The work order {orderName} has the status {orderStatus}. The following
+          users are assigned:
+        </p>
+        {assignee}
+      </div>
+    );
+    // <form>
+    //   <label>
+    //     Name of Work Order:
+    //     <input
+    //       name="orderName"
+    //       type="string"
+    //       value={orderName}
+    //       style={{ width: "300px" }}
+    //       // onChange={this.handleInputChange}
+    //     />
+    //   </label>
+    //   <br />
+    //   <label>
+    //     Order Status:
+    //     <input
+    //       name="orderStatus"
+    //       type="string"
+    //       value={orderStatus}
+    //       style={{ width: "300px" }}
+    //       // onChange={this.handleInputChange}
+    //     />
+    //   </label>
+    //   <br />
+    //   <label>
+    //     Assignee:
+    //     <input
+    //       name="assignee"
+    //       type="string"
+    //       value={assignee}
+    //       style={{ width: "300px" }}
+    //       // onChange={this.handleInputChange}
+    //     />
+    //   </label>
+    //   <br />
+    //   <label>
+    //    Turn Work Order On:
+    //    <button type="button" onClick={this.handleHelloWorld}>
+    //       Who's my favorite Morty?
+    //     </button>
+    //   </label>
+    // </form>
   }
 }
 
