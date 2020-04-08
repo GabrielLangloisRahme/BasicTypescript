@@ -1,13 +1,35 @@
-import express from "express";
+import express, { NextFunction } from "express";
 import sql from "./db";
+import { getDefaultSettings } from "http2";
 
 const app = express();
 const router = express.Router();
 
 app.use(express.json());
 
+let consoleOutput = (
+  req: express.Request,
+  res: express.Response,
+  next: NextFunction
+) => {
+  let dateTime: Date = new Date();
+  res.on("finish", () => {
+    const { method, url } = req;
+    const { statusCode } = res;
+
+    console.log(
+      JSON.stringify({
+        dateTime,
+        method,
+        url,
+        statusCode,
+      })
+    );
+  });
+  next();
+};
+
 router.post("/example", async (req, res) => {
-  console.log("made it 4");
   const response = await sql(
     "SELECT * FROM users WHERE id = ?",
     Number(req.body.id) || 9
@@ -16,27 +38,6 @@ router.post("/example", async (req, res) => {
   return res.json({ favorite });
 });
 
-app.use(
-  "/api",
-  (req, res, next) => {
-    console.log("made it 2");
-    res.on("finish", () => {
-      console.log("made it 3");
-      const { method, url } = req;
-      const { statusCode } = res;
+app.use("/api", consoleOutput, router);
 
-      console.log(
-        JSON.stringify({
-          timestamp: Date.now(),
-          method,
-          url,
-          statusCode,
-        })
-      );
-    });
-    next();
-  },
-  router
-);
-
-app.listen(4000, () => console.log("made it 1"));
+app.listen(4000);
