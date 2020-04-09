@@ -102,28 +102,18 @@ class WorkOrders extends Component<any, WorkOrdersState> {
 }
 
 interface WorkOrderDetailState {
-  workOrderDetail: [
-    {
-      orderName: string;
-      orderStatus: string;
-      assignee: string;
-      email: string;
-      statusToggle: boolean;
-    }
-  ];
+  orderName: string;
+  orderStatus: string;
+  assignee: string[];
+  statusToggle: boolean;
 }
 
 class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
   public state: WorkOrderDetailState = {
-    workOrderDetail: [
-      {
-        orderName: "",
-        orderStatus: "",
-        assignee: "",
-        email: "",
-        statusToggle: false,
-      },
-    ],
+    orderName: "",
+    orderStatus: "",
+    assignee: [""],
+    statusToggle: false,
   };
 
   async componentWillMount() {
@@ -138,49 +128,94 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
     const jsonResponse = await res.json();
 
     if (jsonResponse.workOrderDetail) {
-      this.setState({ workOrderDetail: jsonResponse.workOrderDetail });
-    }
+      let workOrderDetail = jsonResponse.workOrderDetail;
 
-    console.log("This is the props", this.props);
+      let orderName = workOrderDetail.map(
+        (obj: { orderName: string }) => obj.orderName
+      )[0];
 
-    console.log("This is the response", jsonResponse);
-    console.log("This is the state", this.state.workOrderDetail);
-  }
+      let orderStatus = workOrderDetail.map(
+        (obj: { orderStatus: string }) => obj.orderStatus
+      )[0];
 
-  render() {
-    const { workOrderDetail } = this.state;
-    let orderName,
-      orderStatus,
-      assigneeArray,
-      assignee,
-      emailArray: string[],
-      statusToggle,
-      displayContent;
+      let assigneeArray = workOrderDetail.map(
+        (obj: { assignee: string[] }) => obj.assignee
+      );
 
-    if (workOrderDetail) {
-      orderName = workOrderDetail.map(({ orderName }) => orderName)[0];
-      orderStatus = workOrderDetail.map(({ orderStatus }) => orderStatus)[0];
-      assigneeArray = workOrderDetail.map(({ assignee }) => assignee);
+      let emailArray = workOrderDetail.map(
+        (obj: { email: string[] }) => obj.email
+      );
 
-      console.log("this is the type of assigneeArray ", assigneeArray);
-
-      emailArray = workOrderDetail.map(({ email }) => email);
-
-      console.log("this is the emailArray ", emailArray);
-      assignee = assigneeArray.map((assignee, index) => {
+      let assignee = assigneeArray.map((assignee: string, index: number) => {
         if (assignee) {
           return <p title={emailArray[index]}>{assignee}</p>;
         }
       });
 
-      statusToggle = workOrderDetail.map(
-        ({ statusToggle }) => !!statusToggle
+      let statusToggle = workOrderDetail.map(
+        (obj: { statusToggle: boolean }) => !!obj.statusToggle
       )[0];
-    } else {
-      displayContent = <p>No one is assigned</p>;
-    }
 
-    console.log("this is the assignee", assignee);
+      this.setState({ orderName, orderStatus, assignee, statusToggle });
+
+      console.log("this is the state", this.state);
+    }
+  }
+
+  private toggleWorkOrder = async () => {
+    let status: string;
+    if (this.state.statusToggle) {
+      status = "CLOSED";
+    } else {
+      status = "OPEN";
+    }
+    let res = await fetch("/api/toggleWorkOrder", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: this.props.match.params.id, status }),
+    });
+    const jsonResponse = await res.json();
+
+    if (jsonResponse.workOrderDetail) {
+      let workOrderDetail = jsonResponse.workOrderDetail;
+
+      let orderName = workOrderDetail.map(
+        (obj: { orderName: string }) => obj.orderName
+      )[0];
+
+      let orderStatus = workOrderDetail.map(
+        (obj: { orderStatus: string }) => obj.orderStatus
+      )[0];
+
+      let assigneeArray = workOrderDetail.map(
+        (obj: { assignee: string[] }) => obj.assignee
+      );
+
+      let emailArray = workOrderDetail.map(
+        (obj: { email: string[] }) => obj.email
+      );
+
+      let assignee = assigneeArray.map((assignee: string, index: number) => {
+        if (assignee) {
+          return <p title={emailArray[index]}>{assignee}</p>;
+        }
+      });
+
+      let statusToggle = workOrderDetail.map(
+        (obj: { statusToggle: boolean }) => !!obj.statusToggle
+      )[0];
+
+      this.setState({ orderName, orderStatus, assignee, statusToggle });
+    }
+  };
+
+  render() {
+    const { orderName, orderStatus, assignee, statusToggle } = this.state;
+    let displayContent;
+
     return (
       <div>
         <p>
@@ -188,6 +223,9 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
           users are assigned:
         </p>
         {assignee}
+        <button type="button" onClick={this.toggleWorkOrder}>
+          Click here to {this.state.statusToggle ? "close" : "open"} work order
+        </button>
       </div>
     );
   }

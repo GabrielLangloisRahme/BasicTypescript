@@ -59,4 +59,32 @@ module.exports = (router: any) => {
       return res.json({ users });
     }
   );
+
+  router.post(
+    "/toggleWorkOrder",
+    async (req: express.Request, res: express.Response) => {
+      console.log("this is the  body ", req.body);
+      await sql(`UPDATE work_orders SET status='${
+        req.body.status
+      }' where id=${Number(req.body.id)}
+        `);
+
+      let response = await sql(
+        `SELECT C.name as orderName,C.status as orderStatus, D.name as assignee, D.email as email,
+            CASE WHEN C.status='OPEN' then 1 ELSE 0 End as statusToggle FROM 
+            (select * from work_orders A inner join work_order_assignees B on A.id=B.work_order_id where A.id=${Number(
+              req.body.id
+            )}) C inner join users D on  C.user_id=D.id`
+      );
+
+      if (response.length === 0) {
+        response = await sql(`SELECT name as orderName, status as orderStatus, null as assignee, null as email,
+            CASE WHEN status='OPEN' then 1 ELSE 0 End as statusToggle 
+            FROM work_orders where id=${req.body.id}`);
+      }
+
+      const workOrderDetail = response;
+      return res.json({ workOrderDetail });
+    }
+  );
 };
