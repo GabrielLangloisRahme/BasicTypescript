@@ -1,5 +1,10 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  withRouter,
+} from "react-router-dom";
 import logo from "./logo.svg";
 import "./App.css";
 
@@ -282,6 +287,7 @@ interface NewWorkOrderState {
   availableUsers: string[] | null;
   workOrderName: string;
   checked: any;
+  error: string;
 }
 
 class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
@@ -289,6 +295,7 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
     availableUsers: null,
     workOrderName: "",
     checked: false,
+    error: "",
   };
 
   async componentWillMount() {
@@ -309,14 +316,43 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
       this.setState({ availableUsers: availableUsers });
     }
   }
-  private handleSubmit = (event: any) => {
+  private handleSubmit = async (event: any) => {
     event.preventDefault();
-    // let users = Object.keys(this.state).map((id: any) => {
-    //   if (!(id in ["availableUsers", "workOrderName", "name"])) {
-    //     return id;
-    //   }
-    // });
-    console.log("this is the state ", this.state);
+
+    let object: any = this.state;
+    let usersArray: any = [];
+    let name;
+
+    for (let property in object) {
+      if (object[property] === true) {
+        usersArray.push(property);
+      }
+      if (property === "name") {
+        name = object[property];
+      }
+    }
+    console.log("this is the name", name);
+
+    console.log("this is the users", usersArray);
+
+    let res = await fetch("/api/addWorkOrder", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ users: usersArray, name }),
+    });
+
+    let dataRes = await res.json();
+    if (dataRes.success) {
+      this.props.history.push("/");
+    } else {
+      this.setState({
+        error:
+          "There was an error submitting the form, please input values and try again",
+      });
+    }
   };
 
   private handleChange = (event: any) => {
@@ -345,7 +381,7 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
 
     return (
       <form id="workOrder" onSubmit={this.handleSubmit} method="POST">
-        <p>Fill the form below to create a new work order</p>
+        <p>Fill the form below to create a new open work order</p>
         <label>
           Name of Work Order:
           <input name="name" type="text" onChange={this.handleChange} />
@@ -354,28 +390,28 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
         {availableUsersCheckbox}
         <br />
         <input type="submit" />
+        <p style={{ color: "Maroon" }}>{this.state.error}</p>
       </form>
     );
   }
 }
+
+withRouter(NewWorkOrder);
 
 export default class App extends Component {
   render() {
     return (
       <Router>
         <div className="app">
-          <img src={logo} className="app-logo" alt="logo" />
-          <div className="app-body">
-            <Route exact path="/" component={Home} />
-            <Route exact path="/workOrders" component={WorkOrders} />
-            <Route
-              exact
-              path="/workOrderDetail/:id"
-              component={WorkOrderDetail}
-            />
-            <Route exact path="/productivity" component={Productivity} />
-            <Route exact path="/workOrders/new" component={NewWorkOrder} />
-          </div>
+          <Route exact path="/" component={Home} />
+          <Route exact path="/workOrders" component={WorkOrders} />
+          <Route
+            exact
+            path="/workOrderDetail/:id"
+            component={WorkOrderDetail}
+          />
+          <Route exact path="/productivity" component={Productivity} />
+          <Route exact path="/workOrders/new" component={NewWorkOrder} />
         </div>
       </Router>
     );

@@ -1,35 +1,21 @@
 import express, { NextFunction } from "express";
-import sql from "./db";
-import { getDefaultSettings } from "http2";
+import consoleOutput from "./middleware";
 
+// This creates an express server and router
 const app = express();
 const router = express.Router();
+
+// This applies the file that handles http requests to router
 require("./databaseRoutes")(router);
 
 app.use(express.json());
 
-let consoleOutput = (
-  req: express.Request,
-  res: express.Response,
-  next: NextFunction
-) => {
-  let dateTime: Date = new Date();
-  res.on("finish", () => {
-    const { method, url } = req;
-    const { statusCode } = res;
-
-    console.log(
-      JSON.stringify({
-        dateTime,
-        method,
-        url,
-        statusCode,
-      })
-    );
-  });
-  next();
-};
-
+/*This applys root /api url, and a consoleOuput middleware to the router to display
+Date/time (format not important)
+HTTP method
+Path requested
+Status code of response
+*/
 app.use("/api", consoleOutput, router);
 
 app.listen(4000);
