@@ -8,10 +8,13 @@ interface NewWorkOrderState {
   workOrderName: string;
   checked: any;
   error: string;
-  dataFetched: boolean;
+  dataFetched: number;
 }
 
-// Partial was used to allow the state to obtain more attributes than originally defined
+/* Partial was used to allow the state to obtain more attributes than originally defined.
+Unlike other components in the website, datafetch uses a number instead of a boolean to 
+not confuse the code later that selectively captures checkboxes set to true into a user
+array*/
 
 class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
   public state: NewWorkOrderState = {
@@ -19,7 +22,7 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
     workOrderName: "",
     checked: false,
     error: "",
-    dataFetched: false,
+    dataFetched: 0,
   };
 
   // This fetched all available users that are  not assigned to a work order, once fetched it flags this with dataFetched
@@ -39,7 +42,7 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
         (obj: { name: string }) => obj.name
       );
 
-      this.setState({ availableUsers: availableUsers, dataFetched: true });
+      this.setState({ availableUsers: availableUsers, dataFetched: 1 });
     }
   }
   /* This takes the form data structures as name:WorkOrderName, SpecificUserName1:true/false, SpecificUserName3:true/false
@@ -111,7 +114,7 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
     /*This returns a form holding a Name and Available users not assigned to a work order when user data is fetched from backend. 
     The form back end is structured to not accept work orders without a name or associated user. An error message is displayed when this happens */
 
-    if (this.state.dataFetched) {
+    if (this.state.dataFetched === 1) {
       return (
         <form id="workOrder" onSubmit={this.handleSubmit} method="POST">
           <p>Fill the form below to create a new open work order</p>
