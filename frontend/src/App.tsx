@@ -9,6 +9,8 @@ import WorkOrderDetail from "./components/WorkOrderDetail";
 import Productivity from "./components/Productivity";
 import NewWorkOrder from "./components/NewWorkOrder";
 
+/* This holds the routing logic for a Home Page, a Work Order Page, a Work Order Details page with the work order id nexted in the 
+route url, a Productivity Page, and New Work Order Page */
 export default class App extends Component {
   render() {
     return (

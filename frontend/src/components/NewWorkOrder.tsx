@@ -1,12 +1,17 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 
+// This defines the data types used in the state of the component
+
 interface NewWorkOrderState {
   availableUsers: string[] | null;
   workOrderName: string;
   checked: any;
   error: string;
+  dataFetched: boolean;
 }
+
+// Partial was used to allow the state to obtain more attributes than originally defined
 
 class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
   public state: NewWorkOrderState = {
@@ -14,9 +19,12 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
     workOrderName: "",
     checked: false,
     error: "",
+    dataFetched: false,
   };
 
-  async componentWillMount() {
+  // This fetched all available users that are  not assigned to a work order, once fetched it flags this with dataFetched
+
+  async componentDidMount() {
     let res = await fetch("/api/availableUsers", {
       method: "GET",
       headers: {
@@ -31,9 +39,13 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
         (obj: { name: string }) => obj.name
       );
 
-      this.setState({ availableUsers: availableUsers });
+      this.setState({ availableUsers: availableUsers, dataFetched: true });
     }
   }
+  /* This takes the form data structures as name:WorkOrderName, SpecificUserName1:true/false, SpecificUserName3:true/false
+  and selectively selectes the SpecificUserNames with value true and puts them into a user array. It then sends the user array
+  and work order name to the front end. */
+
   private handleSubmit = async (event: any) => {
     event.preventDefault();
 
@@ -49,9 +61,6 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
         name = object[property];
       }
     }
-    console.log("this is the name", name);
-
-    console.log("this is the users", usersArray);
 
     let res = await fetch("/api/addWorkOrder", {
       method: "POST",
@@ -73,6 +82,8 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
     }
   };
 
+  /*This modifies the state such that the form name is added to it with the form value*/
+
   private handleChange = (event: any) => {
     const target = event.target;
     const value = target.type === "checkbox" ? target.checked : target.value;
@@ -84,7 +95,7 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
   };
 
   render() {
-    console.log("these are the available users", this.state.availableUsers);
+    //This creates a JSX object holding the checkboxes
     let availableUsersCheckbox;
     if (this.state.availableUsers) {
       availableUsersCheckbox = this.state.availableUsers.map((name) => (
@@ -97,20 +108,27 @@ class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
       ));
     }
 
-    return (
-      <form id="workOrder" onSubmit={this.handleSubmit} method="POST">
-        <p>Fill the form below to create a new open work order</p>
-        <label>
-          Name of Work Order:
-          <input name="name" type="text" onChange={this.handleChange} />
-        </label>
-        <br />
-        {availableUsersCheckbox}
-        <br />
-        <input type="submit" />
-        <p style={{ color: "Maroon" }}>{this.state.error}</p>
-      </form>
-    );
+    /*This returns a form holding a Name and Available users not assigned to a work order when user data is fetched from backend. 
+    The form back end is structured to not accept work orders without a name or associated user. An error message is displayed when this happens */
+
+    if (this.state.dataFetched) {
+      return (
+        <form id="workOrder" onSubmit={this.handleSubmit} method="POST">
+          <p>Fill the form below to create a new open work order</p>
+          <label>
+            Name of Work Order:
+            <input name="name" type="text" onChange={this.handleChange} />
+          </label>
+          <br />
+          {availableUsersCheckbox}
+          <br />
+          <input type="submit" />
+          <p style={{ color: "Maroon" }}>{this.state.error}</p>
+        </form>
+      );
+    } else {
+      return <div></div>;
+    }
   }
 }
 

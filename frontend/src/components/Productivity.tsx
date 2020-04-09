@@ -1,15 +1,22 @@
 import React, { Component } from "react";
 
+// This defines the data types used in the state of the component
+
 interface ProductivityState {
   availableUsers: string | null;
+  dataFetched: boolean;
 }
 
 class Productivity extends Component<any, ProductivityState> {
   public state: ProductivityState = {
     availableUsers: null,
+    dataFetched: false,
   };
 
-  async componentWillMount() {
+  /* This fetches available users, and transforms it so that array of objects with a user key is an array of strings
+  with the user. This is then transformed into a string using the join function, and inputed int the state*/
+
+  async componentDidMount() {
     let res = await fetch("/api/availableUsers", {
       method: "GET",
       headers: {
@@ -23,23 +30,26 @@ class Productivity extends Component<any, ProductivityState> {
       const availableUsers = jsonResponse.users.map(
         (obj: { name: string }) => obj.name
       );
-      this.setState({ availableUsers: availableUsers.join(", ") });
+      this.setState({
+        availableUsers: availableUsers.join(", "),
+        dataFetched: true,
+      });
     }
   }
 
   render() {
-    let displayAvailableUsers;
-    if (this.state.availableUsers) {
-      displayAvailableUsers =
-        "These are the available users that are not currently in a open work order: " +
-        this.state.availableUsers;
+    if (this.state.dataFetched) {
+      return (
+        <div>
+          <p>
+            These are the available users that are not currently in a open work
+            order: {this.state.availableUsers}
+          </p>
+        </div>
+      );
+    } else {
+      return <div></div>;
     }
-
-    return (
-      <div>
-        <p>{displayAvailableUsers}</p>
-      </div>
-    );
   }
 }
 

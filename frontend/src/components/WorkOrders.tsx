@@ -1,27 +1,24 @@
 import React, { Component } from "react";
 
 import { Link } from "react-router-dom";
+//This specifies the state type holding displayWorkOrder jsx state, and dataFetched boolean to identify when the data is fetched
 
 interface WorkOrdersState {
-  workOrders:
-    | [
-        {
-          id: number;
-          name: string;
-          status: string;
-        }
-      ]
-    | null;
-  workOrdersExist: boolean;
+  displayWorkOrders: any;
+  dataFetched: boolean;
 }
 
 class WorkOrders extends Component<any, WorkOrdersState> {
   public state: WorkOrdersState = {
-    workOrders: null,
-    workOrdersExist: true,
+    displayWorkOrders: "",
+    dataFetched: false,
   };
 
-  async componentWillMount() {
+  /*Once the component mount, all work  orders are fetched. This data is holds the work
+  order id, name and status. The data is transformed and  inputted into a JSX State component
+  and displayed to the front end when the data is fetched */
+
+  async componentDidMount() {
     let res = await fetch("/api/workOrders", {
       method: "GET",
       headers: {
@@ -31,31 +28,30 @@ class WorkOrders extends Component<any, WorkOrdersState> {
     });
     const jsonResponse = await res.json();
 
-    this.setState({ workOrders: jsonResponse.workOrders });
-    this.setState({ workOrdersExist: jsonResponse.workOrders ? true : false });
+    if (jsonResponse.workOrders) {
+      let { workOrders } = jsonResponse;
+      let url = "/workOrderDetail/";
+
+      let displayWorkOrders = workOrders.map(
+        (obj: { id: any; name: string; status: string }) => {
+          let linkUrl = url.concat(obj.id.toString());
+          return (
+            <p>
+              Work order {obj.name} has a status of {obj.status}. Click{" "}
+              <Link to={linkUrl}>here</Link> for details
+            </p>
+          );
+        }
+      );
+      this.setState({
+        displayWorkOrders: displayWorkOrders,
+        dataFetched: true,
+      });
+    }
   }
 
   render() {
-    const { workOrders } = this.state;
-    let displayWorkOrders;
-    let url = "/workOrderDetail/";
-
-    if (workOrders) {
-      displayWorkOrders = workOrders.map(({ id, name, status }) => {
-        let linkUrl = url.concat(id.toString());
-        return (
-          <p>
-            Work order {name} has a status of {status}. Click{" "}
-            <Link to={linkUrl}>here</Link> for details
-          </p>
-        );
-      });
-    } else if (this.state.workOrdersExist) {
-      displayWorkOrders = <p></p>;
-    } else {
-      displayWorkOrders = <p>There are no work orders at this time</p>;
-    }
-    return <div>{displayWorkOrders}</div>;
+    return <div>{this.state.displayWorkOrders}</div>;
   }
 }
 
