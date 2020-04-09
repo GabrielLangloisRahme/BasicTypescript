@@ -280,11 +280,15 @@ class Productivity extends Component<any, ProductivityState> {
 
 interface NewWorkOrderState {
   availableUsers: string[] | null;
+  workOrderName: string;
+  checked: any;
 }
 
-class NewWorkOrder extends Component<any, NewWorkOrderState> {
+class NewWorkOrder extends Component<any, Partial<NewWorkOrderState>> {
   public state: NewWorkOrderState = {
     availableUsers: null,
+    workOrderName: "",
+    checked: false,
   };
 
   async componentWillMount() {
@@ -305,8 +309,25 @@ class NewWorkOrder extends Component<any, NewWorkOrderState> {
       this.setState({ availableUsers: availableUsers });
     }
   }
+  private handleSubmit = (event: any) => {
+    event.preventDefault();
+    // let users = Object.keys(this.state).map((id: any) => {
+    //   if (!(id in ["availableUsers", "workOrderName", "name"])) {
+    //     return id;
+    //   }
+    // });
+    console.log("this is the state ", this.state);
+  };
 
-  checkboxform = () => {};
+  private handleChange = (event: any) => {
+    const target = event.target;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value,
+    });
+  };
 
   render() {
     console.log("these are the available users", this.state.availableUsers);
@@ -316,18 +337,18 @@ class NewWorkOrder extends Component<any, NewWorkOrderState> {
         <div>
           <label>
             {name}:
-            <input name={name} type="checkbox" checked={false} />
+            <input name={name} type="checkbox" onChange={this.handleChange} />
           </label>
         </div>
       ));
     }
 
     return (
-      <form>
+      <form id="workOrder" onSubmit={this.handleSubmit} method="POST">
         <p>Fill the form below to create a new work order</p>
         <label>
           Name of Work Order:
-          <input name="name" type="string" value={""} />
+          <input name="name" type="text" onChange={this.handleChange} />
         </label>
         <br />
         {availableUsersCheckbox}

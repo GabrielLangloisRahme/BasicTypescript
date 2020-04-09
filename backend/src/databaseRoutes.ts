@@ -87,4 +87,13 @@ module.exports = (router: any) => {
       return res.json({ workOrderDetail });
     }
   );
+
+  router.post(
+    "/api/createNewWorkOrder",
+    async (req: express.Request, res: express.Response) => {
+      console.log("this is the  body ", req.body);
+
+      //   return res.json({ workOrderDetail });
+    }
+  );
 };
