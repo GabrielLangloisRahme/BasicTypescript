@@ -12,6 +12,10 @@ function Home() {
       <p>
         Take me to the <Link to="/productivity"> Available Users Page</Link>.
       </p>
+      <p>
+        Take me to the{" "}
+        <Link to="/workOrders/new">Create a Work Order Page</Link>.
+      </p>
     </>
   );
 }
@@ -232,19 +236,11 @@ class WorkOrderDetail extends Component<any, WorkOrderDetailState> {
 }
 
 interface ProductivityState {
-  users:
-    | [
-        {
-          name: string;
-        }
-      ]
-    | null;
-  availableUsers: string[] | null;
+  availableUsers: string | null;
 }
 
 class Productivity extends Component<any, ProductivityState> {
   public state: ProductivityState = {
-    users: null,
     availableUsers: null,
   };
 
@@ -257,33 +253,87 @@ class Productivity extends Component<any, ProductivityState> {
       },
     });
     const jsonResponse = await res.json();
-    this.setState({ users: jsonResponse.users });
 
-    if (this.state.users) {
-      const availableUsers = this.state.users.map(({ name }) => name);
-      console.log("these are the users with no work orders 2", availableUsers);
-      this.setState({ availableUsers: availableUsers });
+    if (jsonResponse.users) {
+      const availableUsers = jsonResponse.users.map(
+        (obj: { name: string }) => obj.name
+      );
+      this.setState({ availableUsers: availableUsers.join(", ") });
     }
   }
 
   render() {
-    let displayAvailableUsers =
-      "These are the available users that are not currently in a work order: ";
-    let numberAvailableUsers = this.state.availableUsers
-      ? this.state.availableUsers
-      : 0;
-    let displaySentence;
+    let displayAvailableUsers;
     if (this.state.availableUsers) {
-      displayAvailableUsers += this.state.availableUsers.join(" ");
-    } else {
       displayAvailableUsers =
-        "There are no available users since everyone is in a work order.";
+        "These are the available users that are not currently in a open work order: " +
+        this.state.availableUsers;
     }
 
     return (
       <div>
         <p>{displayAvailableUsers}</p>
       </div>
+    );
+  }
+}
+
+interface NewWorkOrderState {
+  availableUsers: string[] | null;
+}
+
+class NewWorkOrder extends Component<any, NewWorkOrderState> {
+  public state: NewWorkOrderState = {
+    availableUsers: null,
+  };
+
+  async componentWillMount() {
+    let res = await fetch("/api/availableUsers", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const jsonResponse = await res.json();
+
+    if (jsonResponse.users) {
+      const availableUsers = jsonResponse.users.map(
+        (obj: { name: string }) => obj.name
+      );
+
+      this.setState({ availableUsers: availableUsers });
+    }
+  }
+
+  checkboxform = () => {};
+
+  render() {
+    console.log("these are the available users", this.state.availableUsers);
+    let availableUsersCheckbox;
+    if (this.state.availableUsers) {
+      availableUsersCheckbox = this.state.availableUsers.map((name) => (
+        <div>
+          <label>
+            {name}:
+            <input name={name} type="checkbox" checked={false} />
+          </label>
+        </div>
+      ));
+    }
+
+    return (
+      <form>
+        <p>Fill the form below to create a new work order</p>
+        <label>
+          Name of Work Order:
+          <input name="name" type="string" value={""} />
+        </label>
+        <br />
+        {availableUsersCheckbox}
+        <br />
+        <input type="submit" />
+      </form>
     );
   }
 }
@@ -296,9 +346,14 @@ export default class App extends Component {
           <img src={logo} className="app-logo" alt="logo" />
           <div className="app-body">
             <Route exact path="/" component={Home} />
-            <Route path="/workOrders" component={WorkOrders} />
-            <Route path="/workOrderDetail/:id" component={WorkOrderDetail} />
-            <Route path="/productivity" component={Productivity} />
+            <Route exact path="/workOrders" component={WorkOrders} />
+            <Route
+              exact
+              path="/workOrderDetail/:id"
+              component={WorkOrderDetail}
+            />
+            <Route exact path="/productivity" component={Productivity} />
+            <Route exact path="/workOrders/new" component={NewWorkOrder} />
           </div>
         </div>
       </Router>
