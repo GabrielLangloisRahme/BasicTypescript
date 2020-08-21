@@ -1,2 +1,3 @@
-Basic Project Using Node.JS, SQL, React
+Basic Project Using Node.JS, SQL, React, Typescript
+
 
